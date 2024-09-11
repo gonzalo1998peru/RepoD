@@ -1,39 +1,36 @@
-name: Push from RepoC/main to RepoD/main
+name: Push changes to RepoD
 
 on:
   push:
     branches:
-      - main
+      - main  # Este flujo se activa cuando hay un push en la rama 'main' de RepoC
 
 jobs:
   push_to_dev:
     runs-on: ubuntu-latest
 
     steps:
-    # Paso 1: Checkout del código de la rama 'main' del repositorio RepoC
+    # Paso 1: Checkout del código de la rama 'main' de RepoC
     - name: Checkout RepoC main branch
       uses: actions/checkout@v2
       with:
         ref: main
 
-    # Paso 2: Configurar Git
+    # Paso 2: Configurar Git para los commits automáticos
     - name: Set up Git
       run: |
         git config --global user.name "GitHub Action"
         git config --global user.email "action@github.com"
 
-    # Paso 3: Clonar el repositorio RepoD en la rama 'main'
-    - name: Clone RepoD main branch
+    # Paso 3: Crear un directorio temporal único para clonar el repositorio RepoD
+    - name: Create unique target directory and clone RepoD
       env:
-        TOKEN_BACK: ${{ secrets.secret1 }}  # Usando el secreto 'secret1'
+        TOKEN_BACK: ${{ secrets.secret1 }}  # Secreto configurado con el valor de 'token1'
       run: |
-        git clone --branch main https://x-access-token:${{ secrets.secret1 }}@github.com/gonzalo1998peru/RepoD.git target-repo
-
-    # Paso 4: Sincronizar los cambios de la rama 'main' de RepoC a la rama 'main' de RepoD
-    - name: Sync changes to RepoD main branch
-      run: |
-        rsync -av --exclude='.git' ./ target-repo/
-        cd target-repo
+        dir=$(mktemp -d)
+        git clone --branch main https://x-access-token:${{ secrets.secret1 }}@github.com/gonzalo1998peru/RepoD.git $dir
+        rsync -av --exclude='.git' ./ $dir/
+        cd $dir
         git add .
         git commit -m "Auto-sync from RepoC/main"
         git push origin main
