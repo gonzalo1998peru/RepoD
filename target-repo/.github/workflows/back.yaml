@@ -1,0 +1,25 @@
+name: Actions on push to RepoD
+
+on:
+  push:
+    branches:
+      - main  # Este flujo se activa cuando hay un push en la rama 'main' de RepoD
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Paso 1: Checkout del código de la rama 'main' de RepoD
+    - name: Checkout RepoD main branch
+      uses: actions/checkout@v2
+      with:
+        ref: main
+
+    # Paso 2: Ejecutar comandos o scripts después de recibir los cambios
+    # Puedes ejecutar pruebas automáticas, despliegues, etc.
+    - name: Run tests or deploy
+      run: |
+        echo "Running actions after receiving push from RepoC..."
+        # Aquí puedes poner los comandos que quieras ejecutar
+        # Por ejemplo, ejecutar pruebas con `npm test`, `pytest`, etc.

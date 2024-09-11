@@ -1,25 +1,39 @@
-name: Actions on push to RepoD
+name: Push from RepoC/main to RepoD/main
 
 on:
   push:
     branches:
-      - main  # Este flujo se activa cuando hay un push en la rama 'main' de RepoD
+      - main
 
 jobs:
-  run_tests:
+  push_to_dev:
     runs-on: ubuntu-latest
 
     steps:
-    # Paso 1: Checkout del código de la rama 'main' de RepoD
-    - name: Checkout RepoD main branch
+    # Paso 1: Checkout del código de la rama 'main' del repositorio RepoC
+    - name: Checkout RepoC main branch
       uses: actions/checkout@v2
       with:
         ref: main
 
-    # Paso 2: Ejecutar comandos o scripts después de recibir los cambios
-    # Puedes ejecutar pruebas automáticas, despliegues, etc.
-    - name: Run tests or deploy
+    # Paso 2: Configurar Git
+    - name: Set up Git
       run: |
-        echo "Running actions after receiving push from RepoC..."
-        # Aquí puedes poner los comandos que quieras ejecutar
-        # Por ejemplo, ejecutar pruebas con `npm test`, `pytest`, etc.
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+
+    # Paso 3: Clonar el repositorio RepoD en la rama 'main'
+    - name: Clone RepoD main branch
+      env:
+        TOKEN_BACK: ${{ secrets.secret1 }}  # Usando el secreto 'secret1'
+      run: |
+        git clone --branch main https://x-access-token:${{ secrets.secret1 }}@github.com/gonzalo1998peru/RepoD.git target-repo
+
+    # Paso 4: Sincronizar los cambios de la rama 'main' de RepoC a la rama 'main' de RepoD
+    - name: Sync changes to RepoD main branch
+      run: |
+        rsync -av --exclude='.git' ./ target-repo/
+        cd target-repo
+        git add .
+        git commit -m "Auto-sync from RepoC/main"
+        git push origin main
